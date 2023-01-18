@@ -27,4 +27,13 @@ int main() {
     // 2d Vectors
     vector<vector<int>> v {{1,2}, {3,4}};
     cout << "Great! A 2d vector has been created." << "\n";
+
+    // Enum
+    enum class Friend {Jono, Wald, DevonDog, TheGreenMan};
+
+    Friend bestFriend = Friend::Wald;
+
+    if (bestFriend == Friend::Wald) {
+        cout << "That is my best friend." << "\n";
+    }
 }
