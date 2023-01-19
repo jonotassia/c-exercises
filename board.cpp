@@ -12,7 +12,7 @@ using std::string;
 using std::istringstream;
 using std::sort;
 
-enum class State {kEmpty, kObstacle, kClosed, kPath};
+enum class State {kEmpty, kObstacle, kClosed, kPath, kStart, kFinish};
 
 vector<State> ParseLine(string line) {
     istringstream row(line);
@@ -48,6 +48,20 @@ vector<vector<State>> ReadBoardFile(string path) {
     return grid;
 }
 
+bool Compare(vector<int> nodeSource, vector<int> nodeDest) {
+    int fSource = nodeSource[2] + nodeSource[3];
+    int fDest = nodeDest[2] + nodeDest[3];
+
+    if (fSource > fDest) {
+        return true;
+    } 
+    
+    else {
+        return false;
+        }
+}
+
+
 /**
  * Sort the two-dimensional vector of ints in descending order.
  */
@@ -66,7 +80,48 @@ void AddToOpen(int x, int y, int g, int h, vector<vector<int>> &openNodes, vecto
     grid[x][y] = State::kClosed;
 }
 
-vector<vector<State>> Search(vector<vector<State>> grid, vector<int> init, vector<int> goal) {
+
+bool CheckValidCell(int x, int y, vector<vector<State>> grid) {
+    // Check if x and y are smaller than the largest of each side but greater than 0
+    if (x < 0 || y < 0) {
+        return false;
+    }
+    
+    if (x <= grid.size() && y <= grid[x].size()) {
+        // if kEmpty, return true, else false
+        switch(grid[x][y]) {
+            case State::kEmpty: return true;
+            default: return false;
+        }
+    
+    }
+
+    return false;
+    
+}
+
+void ExpandNeighbors(vector<int> &current, int goal[2], vector<vector<int>> &open, vector<vector<State>> &grid) {
+    // directional deltas
+    const int delta[4][2]{{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+  	
+  	int x = current[0];
+  	int y = current[1];
+  	int g = current[2];
+
+    for (auto direction:delta) {
+        int xStep = x + direction[0];
+        int yStep = y + direction[1];
+
+        // If on grid, calculate heuristic and add to open
+        if (CheckValidCell(xStep, yStep, grid)) {
+            int hStep = Heuristic(xStep, yStep, goal[0], goal[1]);
+            int gStep = g + 1;
+            AddToOpen(xStep, yStep, gStep, hStep, open, grid);
+        }
+    }
+}
+
+vector<vector<State>> Search(vector<vector<State>> grid, int init[2], int goal[2]) {
     vector<vector<int>> open;
 
     // initialize start node
@@ -78,7 +133,8 @@ vector<vector<State>> Search(vector<vector<State>> grid, vector<int> init, vecto
 
     while (open.size() != 0) {
         CellSort(&open);
-        vector<int> currentNode = open[0];
+        vector<int> currentNode = open.back();
+        open.pop_back();
         
         int xCurrent = currentNode[0];
         int yCurrent = currentNode[1];
@@ -86,33 +142,25 @@ vector<vector<State>> Search(vector<vector<State>> grid, vector<int> init, vecto
         grid[xCurrent][yCurrent] = State::kPath;
 
         if (xCurrent == goal[0] & yCurrent == goal[1]) {
+            grid[init[0]][init[1]] = State::kStart;
+            grid[goal[0]][goal[1]] = State::kFinish;
             return grid;
         }
 
-        // Expand neighbors
-        break;
+        // If we're not done, expand search to current node's neighbors.
+        ExpandNeighbors(currentNode, goal, open, grid);
     }
 
     cout << "No path found!" << "\n";
-}
-
-bool Compare(vector<int> nodeSource, vector<int> nodeDest) {
-    int fSource = nodeSource[2] + nodeSource[3];
-    int fDest = nodeDest[2] + nodeDest[3];
-
-    if (fSource > fDest) {
-        return true;
-    } 
-    
-    else {
-        return false;
-        }
+    return std::vector<vector<State>>{};
 }
 
 string CellString(State cell) {
     switch(cell) {
         case State::kObstacle: return "⛰️ ";
-        case State::kPath: return "🚗   ";
+        case State::kPath: return "🚗  ";
+        case State::kStart: return "🚦 ";
+        case State::kFinish: return "🏁 ";
         default: return "0  ";
     }
 }
@@ -129,11 +177,11 @@ void PrintBoard(vector<vector<State>> grid) {
 
 
 int main() {
-    vector<vector<State>> grid = ReadBoardFile("./grid.txt");
+    vector<vector<State>> board = ReadBoardFile("./board.txt");
 
-    vector<int> init = {0, 0};
-    vector<int> goal = {4, 5}; 
-    auto solution = Search(grid, init, goal);
+    int init[2] = {0, 0};
+    int goal[2] = {4, 5}; 
+    auto solution = Search(board, init, goal);
 
     PrintBoard(solution);
 }
