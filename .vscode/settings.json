@@ -1,12 +1,5 @@
 {
     "files.associations": {
-        "ostream": "cpp",
-        "xiosbase": "cpp",
-        "iostream": "cpp",
-        "string": "cpp",
-        "vector": "cpp",
-        "xstring": "cpp",
-        "fstream": "cpp",
-        "xutility": "cpp"
+        "vector": "cpp"
     }
 }
