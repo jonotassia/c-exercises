@@ -63,6 +63,15 @@
         "stop_token": "cpp",
         "xlocbuf": "cpp",
         "xlocmes": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "mutex": "cpp",
+        "condition_variable": "cpp",
+        "functional": "cpp",
+        "future": "cpp",
+        "list": "cpp",
+        "unordered_map": "cpp",
+        "xhash": "cpp",
+        "coroutine": "cpp",
+        "resumable": "cpp"
     }
 }
